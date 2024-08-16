@@ -717,21 +717,27 @@ static esp_err_t stream_handler(httpd_req_t *req) {
 
     int64_t frame_time = fr_end - last_frame;
     frame_time /= 1000;
+    static uint32_t change_time;
 #if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
     uint32_t avg_frame_time = ra_filter_run(&ra_filter, frame_time);
 #endif
-    log_i(
-      "MJPG: %uB %ums (%.1ffps), AVG: %ums (%.1ffps)"
-#if CONFIG_ESP_FACE_DETECT_ENABLED
-      ", %u+%u+%u+%u=%u %s%d"
-#endif
-      ,
-      (uint32_t)(_jpg_buf_len), (uint32_t)frame_time, 1000.0 / (uint32_t)frame_time, avg_frame_time, 1000.0 / avg_frame_time
-#if CONFIG_ESP_FACE_DETECT_ENABLED
-      ,
-      (uint32_t)ready_time, (uint32_t)face_time, (uint32_t)recognize_time, (uint32_t)encode_time, (uint32_t)process_time, (detected) ? "DETECTED " : "", face_id
-#endif
-    );
+	if (( frame_time < change_time * 7/10 ) || (frame_time > change_time * 13/10))
+	{
+	    log_i(
+	      "MJPG: %uB %ums (%.1ffps), AVG: %ums (%.1ffps)"
+	#if CONFIG_ESP_FACE_DETECT_ENABLED
+	      ", %u+%u+%u+%u=%u %s%d"
+	#endif
+	      ,
+	      (uint32_t)(_jpg_buf_len), (uint32_t)frame_time, 1000.0 / (uint32_t)frame_time, avg_frame_time, 1000.0 / avg_frame_time
+	#if CONFIG_ESP_FACE_DETECT_ENABLED
+	      ,
+	      (uint32_t)ready_time, (uint32_t)face_time, (uint32_t)recognize_time, (uint32_t)encode_time, (uint32_t)process_time, (detected) ? "DETECTED " : "", face_id
+	#endif
+	    );
+	    log_i("delta %d %d", change_time, frame_time);
+	   	change_time = frame_time;
+	}
   }
 
 #if CONFIG_LED_ILLUMINATOR_ENABLED
