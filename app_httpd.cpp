@@ -723,7 +723,7 @@ static esp_err_t stream_handler(httpd_req_t *req) {
 #endif
 	if (( frame_time < change_time * 7/10 ) || (frame_time > change_time * 13/10))
 	{
-	    log_i(
+ 	    log_v(
 	      "MJPG: %uB %ums (%.1ffps), AVG: %ums (%.1ffps)"
 	#if CONFIG_ESP_FACE_DETECT_ENABLED
 	      ", %u+%u+%u+%u=%u %s%d"
@@ -735,10 +735,16 @@ static esp_err_t stream_handler(httpd_req_t *req) {
 	      (uint32_t)ready_time, (uint32_t)face_time, (uint32_t)recognize_time, (uint32_t)encode_time, (uint32_t)process_time, (detected) ? "DETECTED " : "", face_id
 	#endif
 	    );
-	    log_i("delta %d %d", change_time, frame_time);
+	    //log_v("delta %d %d", change_time, frame_time);
 	   	change_time = frame_time;
 	}
   }
+
+#if CONFIG_ESP_FACE_DETECT_ENABLED
+	#pragma message ("BUILT WITH FACE DETECTION")
+#else
+	#pragma message ("BUILT WITH **NO** FACE DETECTION")
+#endif
 
 #if CONFIG_LED_ILLUMINATOR_ENABLED
   isStreaming = false;
