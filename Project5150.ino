@@ -36,8 +36,11 @@
 // ===========================
 // Enter your WiFi credentials
 // ===========================
-const char *ssid = "**********";
-const char *password = "**********";
+#define STRINGIZE(x) #x
+#define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
+
+const char *ssid     = STRINGIZE_VALUE_OF(MY_SSID);          //"ssid";
+const char *password = STRINGIZE_VALUE_OF(MY_SSID_PASSWORD); //"password";
 
 void startCameraServer();
 void setupLedFlash(int pin);
