@@ -740,12 +740,6 @@ static esp_err_t stream_handler(httpd_req_t *req) {
 	}
   }
 
-#if CONFIG_ESP_FACE_DETECT_ENABLED
-	#pragma message ("BUILT WITH FACE DETECTION")
-#else
-	#pragma message ("BUILT WITH **NO** FACE DETECTION")
-#endif
-
 #if CONFIG_LED_ILLUMINATOR_ENABLED
   isStreaming = false;
   enable_led(false);

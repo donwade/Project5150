@@ -44,12 +44,14 @@ const char *password = STRINGIZE_VALUE_OF(MY_SSID_PASSWORD); //"password";
 
 void startCameraServer();
 void setupLedFlash(int pin);
+extern void setup2(void);
 
 void setup() {
   Serial.begin(115200);
   delay(5000); // allow serial to catch up
   Serial.setDebugOutput(true);
   Serial.println();
+  setup2();
 
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
@@ -79,19 +81,24 @@ void setup() {
   config.jpeg_quality = 12;
   config.fb_count = 1;
 
+  #pragma GCC warning "using FRAMESIZE_UXGA"
+  #pragma GCC warning "using PIXFORMAT_JPEG"
+
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   //                      for larger pre-allocated frame buffer.
   if (config.pixel_format == PIXFORMAT_JPEG) {
     if (psramFound()) {
-      config.jpeg_quality = 10;
+      config.jpeg_quality = 12;  //waded was 10;
       config.fb_count = 2;
       config.grab_mode = CAMERA_GRAB_LATEST;
     } else {
+      assert(0); //#error not allowed
       // Limit the frame size when PSRAM is not available
       config.frame_size = FRAMESIZE_SVGA;
       config.fb_location = CAMERA_FB_IN_DRAM;
     }
   } else {
+    assert(0);  //#error not allowed
     // Best option for face detection/recognition
     config.frame_size = FRAMESIZE_240X240;
 #if CONFIG_IDF_TARGET_ESP32S3
@@ -118,10 +125,22 @@ void setup() {
     s->set_brightness(s, 1);   // up the brightness just a bit
     s->set_saturation(s, -2);  // lower the saturation
   }
+
   // drop down frame size for higher initial frame rate
   if (config.pixel_format == PIXFORMAT_JPEG) {
-    s->set_framesize(s, FRAMESIZE_QVGA);
+    //s->set_framesize(s, FRAMESIZE_QVGA);
+    s->set_framesize(s, FRAMESIZE_SXGA); //dwade new.
+    log_i("dwade - setting framesize to FRAMESIZE_SXGA (1280x1024)");
+    log_i("dwade - was FRAMESIZE_QVGA (320x240) ");
+
+    /*
+    log_i("dwade - flipping x cause I'm dizzy");
+    s->set_vflip(s, 1);
+    log_i("dwade - flipping y cause I'm can");
+    s->set_hmirror(s, 1);
+    */
   }
+
 
 #if defined(CAMERA_MODEL_M5STACK_WIDE) || defined(CAMERA_MODEL_M5STACK_ESP32CAM)
   s->set_vflip(s, 1);
